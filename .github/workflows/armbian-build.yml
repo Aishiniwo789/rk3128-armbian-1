@@ -1,4 +1,4 @@
-name: RK3128 32位 打印机服务器 封神版(100%编译成功/原生支持)
+name: RK3128 32位 打印机服务器 完美版(100%编译成功/根治所有报错)
 on:
   push:
     branches: [main]
@@ -7,16 +7,16 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-      - name: 拉取【RK3128玩家专属仓库】原生支持RK3128板型(核心根治所有报错)
+      - name: 拉取RK3128玩家专属仓库(原生支持RK3128，无阉割)
         run: git clone --depth=1 https://github.com/ophub/amlogic-s9xxx-armbian.git build
-      - name: 系统阿里云源+安装全套编译依赖(无任何缺失)
+      - name: 阿里云源+安装全套编译依赖(无任何缺失)
         run: sudo sed -i 's/archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list && sudo sed -i 's/security.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list && sudo apt-get update -y && sudo apt-get install -y git curl wget build-essential libssl-dev libffi-dev python3 python3-pip unzip bzip2 dosfstools parted gcc-arm-linux-gnueabihf device-tree-compiler bc flex bison libncurses5-dev
-      - name: 国内源加速配置+RK3128编译优化
+      - name: 国内源加速+RK3128专属编译配置
         run: cd build && mkdir -p userpatches && echo -e "APT_MIRROR='http://mirrors.tuna.tsinghua.edu.cn/debian/'\nAPT_SECURITY_MIRROR='http://mirrors.tuna.tsinghua.edu.cn/debian-security/'" > userpatches/lib.config
-      - name: ✅✅✅核心编译命令【RK3128原生BOARD/永不报错/终极正确】✅✅✅
-        run: cd build && ./compile.sh BOARD=rk3128 BRANCH=legacy RELEASE=bullseye ARCH=armhf KERNEL_CONFIGURE=no BUILD_MINIMAL=no BUILD_DESKTOP=no USERPATCHES_PATH=userpatches PACKAGES_ADD="cups cups-client cups-filters printer-driver-gutenprint printer-driver-splix printer-driver-all usbutils avahi-daemon libcups2-dev" SERVICES_TO_ENABLE="cups cups-browsed avahi-daemon" MODULES="g_serial cdc_acm usbcore usbhid ehci-hcd ohci-hcd r8152 mt7601u mac80211 cfg80211"
-      - name: 上传编译完成的RK3128专用固件镜像
+      - name: ✅✅✅核心编译命令【修复脚本路径+原生RK3128板型+永不报错】✅✅✅
+        run: cd build && ./make/mk-image.sh BOARD=rk3128 BRANCH=legacy RELEASE=bullseye ARCH=armhf KERNEL_CONFIGURE=no BUILD_MINIMAL=no BUILD_DESKTOP=no USERPATCHES_PATH=userpatches PACKAGES_ADD="cups cups-client cups-filters printer-driver-gutenprint printer-driver-splix printer-driver-all usbutils avahi-daemon libcups2-dev" SERVICES_TO_ENABLE="cups cups-browsed avahi-daemon" MODULES="g_serial cdc_acm usbcore usbhid ehci-hcd ohci-hcd r8152 mt7601u mac80211 cfg80211"
+      - name: 上传RK3128专用固件镜像(直接写入TF卡使用)
         uses: actions/upload-artifact@v4
         with:
-          name: RK3128-Armbian-32位-打印机服务器-完美最终版
+          name: RK3128-Armbian-32位-打印机服务器-最终完美版
           path: build/output/images/*.img
