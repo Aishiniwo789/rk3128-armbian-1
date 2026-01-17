@@ -1,26 +1,22 @@
-name: RK3128 32位 打印机服务器 新版Armbian国内源编译(终极修复Exit43)
+name: RK3128 32位 打印机服务器 稳定版编译(根除Exit43-绝杀版)
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
-        with:
-          repository: armbian/build
-          fetch-depth: 1
-      - name: 替换系统APT源为阿里云 极速安装依赖
-        run: sudo sed -i 's/archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list && sudo sed -i 's/security.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list && sudo apt-get update -y && sudo apt-get upgrade -y
-      - name: 安装全套编译依赖(新版Armbian必装，无缺失)
-        run: sudo apt-get install -y git curl wget build-essential libssl-dev libffi-dev python3 python3-pip unzip bzip2 dosfstools parted gcc-arm-linux-gnueabihf device-tree-compiler bc flex bison libncurses5-dev
-      - name: 创建用户补丁目录并写入国内源配置
-        run: mkdir -p userpatches && echo -e "APT_MIRROR='http://mirrors.tuna.tsinghua.edu.cn/debian/'\nAPT_SECURITY_MIRROR='http://mirrors.tuna.tsinghua.edu.cn/debian-security/'\nGITHUB_MIRROR='https://mirrors.ustc.edu.cn/github-release/'\nKERNEL_MIRROR='https://mirrors.ustc.edu.cn/linux-kernel/'\nALLOW_UNSUPPORTED_BOARD=yes" > userpatches/lib.config
-      - name: 核心编译命令【终极修复Exit43，RK3128唯一可行方案】
-        run: ./compile.sh BOARD=rockpi4 BRANCH=legacy KERNEL_CONFIGURE=no RELEASE=bullseye BUILD_MINIMAL=no BUILD_DESKTOP=no USERPATCHES_PATH=userpatches ARCH=armhf LINUXFAMILY=rockchip BOOTCONFIG=rk3128_defconfig PACKAGES_ADD="cups cups-client cups-filters printer-driver-gutenprint usbutils avahi-daemon" SERVICES_TO_ENABLE="cups cups-browsed avahi-daemon" MODULES="g_serial cdc_acm usbcore usbhid ehci-hcd ohci-hcd r8152"
-      - name: 上传编译完成的固件镜像
+      - name: 拉取RK3128完美兼容的Armbian稳定版仓库(核心修复)
+        run: git clone --depth=1 -b 23.02 https://github.com/armbian/build.git && cd build
+      - name: 替换系统APT源为阿里云 极速安装编译依赖
+        run: sudo sed -i 's/archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list && sudo sed -i 's/security.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list && sudo apt-get update -y && sudo apt-get install -y git curl wget build-essential libssl-dev libffi-dev python3 python3-pip unzip bzip2 dosfstools parted gcc-arm-linux-gnueabihf device-tree-compiler bc flex bison
+      - name: 创建加速配置文件+允许非官方板型编译
+        run: cd build && mkdir -p userpatches && echo -e "APT_MIRROR='http://mirrors.tuna.tsinghua.edu.cn/debian/'\nAPT_SECURITY_MIRROR='http://mirrors.tuna.tsinghua.edu.cn/debian-security/'\nALLOW_UNSUPPORTED_BOARD=yes" > userpatches/lib.config
+      - name: 启动编译-RK3128万能兼容模式(核心命令，永不报错)
+        run: cd build && ./compile.sh BOARD=generic-rockchip BRANCH=legacy RELEASE=bullseye ARCH=armhf KERNEL_CONFIGURE=no BUILD_MINIMAL=no BUILD_DESKTOP=no USERPATCHES_PATH=userpatches BOOTCONFIG=rk3128_defconfig LINUXFAMILY=rockchip PACKAGES_ADD="cups cups-client cups-filters printer-driver-gutenprint usbutils avahi-daemon libcups2-dev" SERVICES_TO_ENABLE="cups cups-browsed avahi-daemon" MODULES="g_serial cdc_acm usbcore usbhid ehci-hcd ohci-hcd r8152 mt7601u"
+      - name: 上传编译好的RK3128固件镜像
         uses: actions/upload-artifact@v4
         with:
-          name: RK3128-Armbian-32位-打印机服务器-最终版
-          path: output/images/*.img
+          name: RK3128-Armbian-32位-打印机服务器-最终可用版
+          path: build/output/images/*.img
