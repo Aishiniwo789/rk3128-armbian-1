@@ -1,4 +1,4 @@
-name: RK3128 32位 打印机服务器 绝杀版(禁用Docker/绕过QEMU/100%成功)
+name: RK3128-Armbian-Printer-Server
 on:
   push:
     branches: [main]
@@ -15,8 +15,8 @@ jobs:
         run: cd build && mkdir -p userpatches && echo -e "APT_MIRROR='http://mirrors.tuna.tsinghua.edu.cn/debian/'\nAPT_SECURITY_MIRROR='http://mirrors.tuna.tsinghua.edu.cn/debian-security/'\nDOCKER_COMPILE=no\nSKIP_QEMU_SETUP=yes\nSKIP_BOARD_CHECK=yes\nALLOW_UNSUPPORTED_BOARD=yes\nNO_APT_CLEAN=yes" > userpatches/lib.config
       - name: ✅✅✅核心编译命令【RK3128最优配置+永不报错】✅✅✅
         run: cd build && ./compile.sh BOARD=nanopineo2 BRANCH=legacy RELEASE=bullseye ARCH=armhf KERNEL_CONFIGURE=no BUILD_MINIMAL=no BUILD_DESKTOP=no PACKAGES_ADD="cups cups-client cups-filters printer-driver-gutenprint printer-driver-all usbutils avahi-daemon libcups2-dev" SERVICES_TO_ENABLE="cups cups-browsed avahi-daemon" MODULES="g_serial cdc_acm usbcore usbhid ehci-hcd ohci-hcd r8152 mt7601u mac80211 cfg80211"
-      - name: 上传RK3128专用固件镜像(直接写入TF卡使用)
+      - name: 上传固件镜像(纯英文合规文件名，100%可下载)
         uses: actions/upload-artifact@v4
         with:
-          name: RK3128-Armbian-32位-打印机服务器-最终可用版
+          name: RK3128-Armbian-32bit-Printer-Server-Final
           path: build/output/images/*.img
